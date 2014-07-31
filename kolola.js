@@ -111,12 +111,16 @@ function KOLOLA(endpoint)
      *      "foo" : Events by keyword
      *       
      */
-    self.query = function(q, cb_events, cb_people)
+    self.query = function(q, cb_events, cb_people, cb_all)
     {
+        if(typeof cb_all === 'undefined')
+            cb_all = function(){};
+        
         var cb = function(data)
         {
             cb_events(data.events);
             cb_people(data.people);
+            cb_all(data);
         }
         
         self.client.request({'q': q}, cb);
