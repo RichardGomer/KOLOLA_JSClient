@@ -31,7 +31,6 @@ function QuickAPIClient(endpoint)
     
     self.username = false;
     self.password = false;
-    self.endpoint = endpoint;
     
     // Set the username/password for HTTP Authentication
     self.setAuth = function(username, password)
@@ -70,8 +69,7 @@ function QuickAPIClient(endpoint)
                 cb_error(data, status, xhr);
             }
         };
-        self.endpoint = self.endpoint + "?callback=?";
-        var r = $.post(self.endpoint, args, cb, 'json');
+        var r = $.post(endpoint + "?callback=?", args, cb, 'json');
         r.error(cb_fail);
     }
     
