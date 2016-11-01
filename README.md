@@ -6,13 +6,17 @@ The Javascript client library for the KOLOLA API.  It's a pretty simple client (
 * TIP: In Firefox, use JSONView to pretty-print raw JSON output from the API! https://addons.mozilla.org/en-US/firefox/addon/jsonview/
 * The API is GET/POST based rather than truly RESTFUL, which makes it quite easy to query just by typing URLs into a web browser.
 
+## Requirements
+
+* jQuery
+
 ## Instantiation
 
+Generate a new API token using the admin tools in the target instance.
 
-Just do
 ```javascript
 var endpoint_url = "http://www.wsdtc.deimpact.org.uk/api/1/"; // For example
-var client = new KOLOLA(endpoint_url);
+var client = new KOLOLA(endpoint_url, "the-generated-api-token");
 ```
 
 ## Querying Events/People
@@ -22,6 +26,8 @@ The most powerful feature is the ability to query the event database.  The same 
 * "user:rcg1v07" - To get all events that involved a particular user (by username)
 * "02/2014" - To get all events in February 2014
 * "headley" - To get all events with the word "headley" in the title or description
+
+See https://www.kolola.net/support/user_support/queries.html for more information about using search queries in KOLOLA
 
 Queries are sent like so:
 ```javascript

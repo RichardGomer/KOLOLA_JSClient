@@ -24,75 +24,17 @@
     SOFTWARE.
  *
  */
- 
-function QuickAPIClient(endpoint)
-{
-    var self = this;
-    
-    self.username = false;
-    self.password = false;
-    
-    // Set the username/password for HTTP Authentication
-    self.setAuth = function(username, password)
-    {
-        self.username = username;
-        self.password = password;
-    }
-    
-    /**
-    * Make a request to the API
-    *
-    * cb_success: function(data, status, jqXHR) callback if operation succeeds
-    * cb_error (optional): function(Data, status, jqXHR) callback if API returns an error
-    * cb_fail (optional, as above): Callback if something goes wrong with the request
-    */
-    self.request = function(args, cb_success, cb_error, cb_fail)
-    {
-        if(typeof cb_error == 'undefined')
-            cb_error = self.default_error;
-        
-        if(typeof cb_fail == 'undefined')
-            cb_fail = self.default_fail;
-        
-        // Parse the JSON from the API and determine if the operation was successful
-        var cb = function(data, status, xhr){
-            if(typeof data.success == 'undefined')
-            {
-                cb_fail(data, status, xhr);
-            }
-            else if(data.success)
-            {
-                cb_success(data.result, status, xhr);
-            }
-            else
-            {
-                cb_error(data, status, xhr);
-            }
-        };
-        var r = $.post(endpoint + "?callback=?", args, cb, 'json');
-        r.error(cb_fail);
-    }
-    
-    
-    /**
-     * Default callbacks for errors / failures
-     */
-    self.cb_error = function(result)
-    {
-        alert('RPC Error: ' + result.message);
-    }
-    
-    self.cb_fail = function(result)
-    {
-        alert('HTTP RPC Failed D: (' + status + ')');
-    }
-}
+
+
 
 /**
  * Instantiate a KOLOLA object with an API endpoint
- * eg http://www.wsdtc.deimpact.org.uk/api/1/
+ * eg http://www.wsdtc.deimpact.org.uk/api/1/ 
+ *
+ * and an access token, generated via the admin tools
+ * eg abcd-1234-abcd-5678
  */
-function KOLOLA(endpoint)
+function KOLOLA(endpoint, token)
 {
     var self = this;
     
@@ -121,12 +63,12 @@ function KOLOLA(endpoint)
             cb_all(data);
         }
         
-        self.client.request({'q': q}, cb);
+        self.client.request({'q': q, 'token': token}, cb);
     }
     
     self.getEvent = function(id, cb)
     {
-        self.client.request({'event': id}, cb);   
+        self.client.request({'event': id, 'token': token}, cb);   
     }
     
     /**
@@ -134,7 +76,7 @@ function KOLOLA(endpoint)
      */
     self.getFramework = function(cb)
     {
-        self.client.request({'features':null}, cb);
+        self.client.request({'features':null, 'token': token}, cb);
     }
     
     /**
@@ -142,9 +84,81 @@ function KOLOLA(endpoint)
      */
     self.getPerson = function(id, cb)
     {
-        self.client.request({'person': id}, cb);   
+        self.client.request({'person': id, 'token': token}, cb);   
     }
 }
 
 
+
+function QuickAPIClient(endpoint)
+{
+    var self = this;
+    
+    self.username = false;
+    self.password = false;
+    
+    // Set the username/password for HTTP Authentication
+    self.setAuth = function(username, password)
+    {
+        self.username = username;
+        self.password = password;
+    }
+    
+    /**
+    * Make a request to the API
+    *
+    * cb_success: function(data, status, jqXHR) callback if opreation succeeds
+    * cb_error (optional): function(Data, status, jqXHR) callback if API returns an error
+    * cb_fail (optional, as above): Callback if something goes wrong with the request
+    */
+    self.request = function(args, cb_success, cb_fail, cb_error)
+    {
+        if(typeof cb_error == 'undefined')
+            cb_error = self.cb_error;
+        
+        if(typeof cb_fail == 'undefined')
+            cb_fail = self.cb_fail;
+        
+        // Parse the JSON from the API and determine if the operation was successful
+        var cb = function(data, status, xhr){
+            if(typeof data.success == 'undefined')
+            {
+                cb_error(data, status, xhr);
+            }
+            else if(data.success)
+            {
+                cb_success(data, status, xhr);
+            }
+            else
+            {
+                cb_fail(data, status, xhr);
+            }
+        };
+        
+        if(self.username !== false && self.password !== false)
+        {
+            args.user = self.username;
+            args.pass = self.password;
+        }
+        
+        var r = $.post(endpoint, args, cb, 'json');
+        r.error(cb_error);
+    }
+    
+    
+    /**
+     * Default callbacks for errors / failures
+     */
+    // The other end "successfully" reported a problem with the request
+    self.cb_fail = function(result)
+    {
+        alert('RPC was unsuccessful ' + result.message);
+    }
+    
+    // Unexpected errors
+    self.cb_error = function(status)
+    {
+        alert('Error during RPC (' + status + ')');
+    }
+}
 
